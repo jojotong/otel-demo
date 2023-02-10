@@ -1,0 +1,17 @@
+resources:
+- deployment.yaml
+- service.yaml
+namespace: otel-demo
+
+generatorOptions:
+  disableNameSuffixHash: true
+
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+images:
+- name: otel-demo-server
+  newName: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo
+  newTag: v0.1.0
+- name: otel-demo-worker
+  newName: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo
+  newTag: v0.1.0

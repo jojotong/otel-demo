@@ -1,0 +1,5 @@
+@startuml demo
+client -> server: 1. 随机发起用户请求 /users/xxx
+server -> worker: 2. 获取用户名，并调用worker hello接口
+worker -> server: 3. 返回 "hello {用户名}"
+server -> client: 4. 返回
