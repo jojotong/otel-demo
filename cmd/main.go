@@ -28,9 +28,9 @@ import (
 )
 
 var (
+	// client
 	serverAddr string
 	interval   int
-	workerAddr string
 )
 
 func main() {
@@ -55,10 +55,16 @@ func main() {
 			if err := observe.Init(context.TODO()); err != nil {
 				return err
 			}
-			return server.Run(workerAddr)
+			if err := server.Init(); err != nil {
+				return err
+			}
+			return server.Run()
 		},
 	}
-	servercmd.Flags().StringVarP(&workerAddr, "worker-addr", "w", "http://localhost:8081", "")
+	servercmd.Flags().StringVarP(&server.Opts.WorkerAddr, "worker-addr", "w", "http://localhost:8081", "")
+	servercmd.Flags().StringVarP(&server.Opts.MysqlAddr, "mysql-addr", "", "localhost:3306", "")
+	servercmd.Flags().StringVarP(&server.Opts.MysqlRootPassword, "mysql-root-password", "", "", "")
+	servercmd.Flags().StringVarP(&server.Opts.MysqlDBName, "mysql-db-name", "", "kubegems", "")
 
 	workercmd := &cobra.Command{
 		Use:   "worker",

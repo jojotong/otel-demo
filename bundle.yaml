@@ -82,8 +82,8 @@ spec:
           value: http://opentelemetry-collector.observability:4318
         - name: OTEL_EXPORTER_OTLP_INSECURE
           value: "true"
-        image: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo:v0.1.2
-        imagePullPolicy: IfNotPresent
+        image: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo:v0.2.0
+        imagePullPolicy: Always
         name: otel-demo-client
         resources: {}
 ---
@@ -108,6 +108,9 @@ spec:
         - server
         - -w
         - http://otel-demo-worker:8081
+        - --mysql-addr=kubegems-mysql.kubegems:3306
+        - --mysql-root-password=X69KdO15T8
+        - --mysql-db-name=kubegems
         env:
         - name: OTEL_K8S_NODE_NAME
           valueFrom:
@@ -135,8 +138,8 @@ spec:
           value: http://opentelemetry-collector.observability:4318
         - name: OTEL_EXPORTER_OTLP_INSECURE
           value: "true"
-        image: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo:v0.1.2
-        imagePullPolicy: IfNotPresent
+        image: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo:v0.2.0
+        imagePullPolicy: Always
         name: otel-demo-server
         ports:
         - containerPort: 8080
@@ -190,8 +193,8 @@ spec:
           value: http://opentelemetry-collector.observability:4318
         - name: OTEL_EXPORTER_OTLP_INSECURE
           value: "true"
-        image: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo:v0.1.2
-        imagePullPolicy: IfNotPresent
+        image: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo:v0.2.0
+        imagePullPolicy: Always
         name: otel-demo-worker
         ports:
         - containerPort: 8081

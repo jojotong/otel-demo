@@ -11,4 +11,4 @@ kind: Kustomization
 images:
 - name: otel-demo
   newName: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo
-  newTag: v0.1.2
+  newTag: v0.2.0

@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"sync"
 	"time"
 
 	"jojotong/otel-demo/pkg/observe/gorm/tracing"
@@ -40,9 +39,42 @@ import (
 	"gorm.io/gorm"
 )
 
-var tracer = otel.Tracer("jojotong/otel-demo")
+type ServerOptions struct {
+	WorkerAddr string
 
-func Run(workerAddr string) error {
+	MysqlAddr         string
+	MysqlRootPassword string
+	MysqlDBName       string
+}
+
+var (
+	db     *gorm.DB
+	tracer = otel.Tracer("jojotong/otel-demo")
+	Opts   = &ServerOptions{}
+)
+
+func Init() error {
+	cfg := &driver.Config{
+		User: "root",
+		// Passwd:               "X69KdO15T8",
+		Passwd: Opts.MysqlRootPassword,
+		Net:    "tcp",
+		// Addr:                 "kubegems-mysql.kubegems:3306",
+		Addr:                 Opts.MysqlAddr,
+		DBName:               Opts.MysqlDBName,
+		Collation:            "utf8mb4_unicode_ci",
+		AllowNativePasswords: true,
+	}
+	dsn := cfg.FormatDSN()
+	var err error
+	db, err = gorm.Open(mysql.Open(dsn))
+	if err != nil {
+		return err
+	}
+	return db.Use(tracing.NewPlugin(tracing.WithoutMetrics()))
+}
+
+func Run() error {
 	router := gin.New()
 	router.Use(
 		otelgin.Middleware("server", otelgin.WithFilter(func(r *http.Request) bool {
@@ -58,7 +90,7 @@ func Run(workerAddr string) error {
 			c.JSON(http.StatusBadRequest, err.Error())
 			return
 		}
-		echoResp, err := doHelloRequest(ctx, workerAddr, id, name)
+		echoResp, err := doHelloRequest(ctx, Opts.WorkerAddr, id, name)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, err.Error())
 			return
@@ -117,7 +149,7 @@ func getUser(ctx context.Context, id string) (string, error) {
 	)
 	var username string
 	// get user name from db, if you want to trace it, `WithContext` is necessary.
-	result := getDB().WithContext(newCtx).Raw(`select username from users where id = ?`, id).Scan(&username)
+	result := db.WithContext(newCtx).Raw(`select username from users where id = ?`, id).Scan(&username)
 	if result.Error != nil || result.RowsAffected == 0 {
 		err := fmt.Errorf("user %s not found", id)
 		span.SetStatus(codes.Error, err.Error())
@@ -132,33 +164,4 @@ func getUser(ctx context.Context, id string) (string, error) {
 	)
 	span.SetStatus(codes.Ok, "")
 	return username, nil
-}
-
-var (
-	once sync.Once
-	db   *gorm.DB
-)
-
-func getDB() *gorm.DB {
-	once.Do(func() {
-		cfg := &driver.Config{
-			User:                 "root",
-			Passwd:               "X69KdO15T8",
-			Net:                  "tcp",
-			Addr:                 "kubegems-mysql.kubegems:3306",
-			DBName:               "kubegems",
-			Collation:            "utf8mb4_unicode_ci",
-			AllowNativePasswords: true,
-		}
-		dsn := cfg.FormatDSN()
-		var err error
-		db, err = gorm.Open(mysql.Open(dsn))
-		if err != nil {
-			panic(err)
-		}
-		if err := db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {
-			panic(err)
-		}
-	})
-	return db
 }

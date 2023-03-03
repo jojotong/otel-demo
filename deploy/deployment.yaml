@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - image: otel-demo:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           args:
             - "client"
             - "-s"
@@ -69,11 +69,14 @@ spec:
     spec:
       containers:
         - image: otel-demo:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           args:
             - "server"
             - "-w"
             - "http://otel-demo-worker:8081"
+            - --mysql-addr=kubegems-mysql.kubegems:3306
+            - --mysql-root-password=X69KdO15T8
+            - --mysql-db-name=kubegems
           env:
             - name: OTEL_K8S_NODE_NAME
               valueFrom:
@@ -125,7 +128,7 @@ spec:
     spec:
       containers:
         - image: otel-demo:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           args:
             - "worker"
           env:
