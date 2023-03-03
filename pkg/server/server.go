@@ -145,7 +145,7 @@ func getDB() *gorm.DB {
 			User:                 "root",
 			Passwd:               "X69KdO15T8",
 			Net:                  "tcp",
-			Addr:                 "10.12.32.41:3306",
+			Addr:                 "kubegems-mysql.kubegems:3306",
 			DBName:               "kubegems",
 			Collation:            "utf8mb4_unicode_ci",
 			AllowNativePasswords: true,

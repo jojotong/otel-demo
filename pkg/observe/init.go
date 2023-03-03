@@ -20,7 +20,6 @@ import (
 	"context"
 	"time"
 
-	"go.opentelemetry.io/contrib/instrumentation/runtime"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp"
 	"go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp"
@@ -67,5 +66,5 @@ func Init(ctx context.Context) error {
 	}
 
 	// start runtime metric
-	return runtime.Start(runtime.WithMinimumReadMemStatsInterval(15 * time.Second))
+	return nil
 }

@@ -35,6 +35,61 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: otel-demo-client
+  namespace: otel-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: otel-demo-client
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: otel-demo-client
+        app.kubernetes.io/name: otel-demo-client
+    spec:
+      containers:
+      - args:
+        - client
+        - -s
+        - http://otel-demo-server:8080
+        - -i
+        - "5"
+        env:
+        - name: OTEL_K8S_NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        - name: OTEL_K8S_POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: OTEL_SERVICE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.labels['app.kubernetes.io/name']
+        - name: OTEL_K8S_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: OTEL_RESOURCE_ATTRIBUTES
+          value: service.name=$(OTEL_SERVICE_NAME),namespace=$(OTEL_K8S_NAMESPACE),node=$(OTEL_K8S_NODE_NAME),pod=$(OTEL_K8S_POD_NAME)
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: http://opentelemetry-collector.observability:4318
+        - name: OTEL_EXPORTER_OTLP_INSECURE
+          value: "true"
+        image: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo:v0.1.2
+        imagePullPolicy: IfNotPresent
+        name: otel-demo-client
+        resources: {}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: otel-demo-server
   namespace: otel-demo
 spec:
@@ -80,7 +135,7 @@ spec:
           value: http://opentelemetry-collector.observability:4318
         - name: OTEL_EXPORTER_OTLP_INSECURE
           value: "true"
-        image: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo:v0.1.0
+        image: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo:v0.1.2
         imagePullPolicy: IfNotPresent
         name: otel-demo-server
         ports:
@@ -88,8 +143,6 @@ spec:
           name: http
           protocol: TCP
         resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -137,7 +190,7 @@ spec:
           value: http://opentelemetry-collector.observability:4318
         - name: OTEL_EXPORTER_OTLP_INSECURE
           value: "true"
-        image: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo:v0.1.0
+        image: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo:v0.1.2
         imagePullPolicy: IfNotPresent
         name: otel-demo-worker
         ports:
@@ -145,5 +198,3 @@ spec:
           name: http
           protocol: TCP
         resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File

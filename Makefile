@@ -76,7 +76,7 @@ endif
 
 .PHONY: bundle
 bundle: ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd deploy && kustomize edit set image otel-demo-server=${IMG2} && kustomize edit set image otel-demo-worker=${IMG2}
+	cd deploy && kustomize edit set image otel-demo=${IMG2}
 	kustomize build deploy > bundle.yaml
 
 .PHONY: deploy

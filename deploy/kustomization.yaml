@@ -9,9 +9,6 @@ generatorOptions:
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 images:
-- name: otel-demo-server
+- name: otel-demo
   newName: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo
-  newTag: v0.1.0
-- name: otel-demo-worker
-  newName: registry.cn-beijing.aliyuncs.com/kubegems/otel-demo
-  newTag: v0.1.0
+  newTag: v0.1.2
